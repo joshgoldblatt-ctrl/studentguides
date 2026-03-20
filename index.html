@@ -284,11 +284,30 @@
   let currentIdx   = 0;
   let pendingTimer = null;   // timeout handle for the GAP between slides
   let generation   = 0;      // incremented on every cancel so stale onend is ignored
+  let paused       = false;
+  let muted        = false;
 
   function cancelPending() {
     generation++;             // invalidate any in-flight utterance callbacks
     if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
     window.speechSynthesis.cancel();
+  }
+
+  function togglePause() {
+    const btn = document.getElementById('btn-pause');
+    if (paused) {
+      // Resume
+      paused = false;
+      btn.innerHTML = '&#9646;&#9646;';
+      btn.title = 'Pause';
+      speakSlide(currentIdx, true);
+    } else {
+      // Pause
+      paused = true;
+      btn.innerHTML = '&#9654;';
+      btn.title = 'Resume';
+      cancelPending();
+    }
   }
 
   // ── DISPLAY ──────────────────────────────────────────────────────────────
@@ -308,19 +327,36 @@
       Math.round(((idx + 1) / N) * 100) + '%';
   }
 
+  function toggleMute() {
+    muted = !muted;
+    const btn = document.getElementById('btn-mute');
+    if (btn) { btn.innerHTML = muted ? '🔇' : '🔊'; btn.title = muted ? 'Unmute' : 'Mute sound'; }
+    if (muted) {
+      window.speechSynthesis.cancel();
+    } else if (!paused) {
+      // Restart speech for the current slide
+      speakSlide(currentIdx, true);
+    }
+  }
+
   // ── CORE: speak slide idx, then auto-advance ──────────────────────────────
   function speakSlide(idx, autoNext) {
     if (idx >= N) return;
 
     showSlide(idx);
 
-    // Capture generation at the moment this call was made.
-    // If generation changes before the callback fires, we're stale → ignore.
     const myGen = generation;
 
-    // Longer delay after cancel gives Chrome time to fully stop the old utterance.
     setTimeout(() => {
-      if (myGen !== generation) return;  // a newer jumpTo fired — bail out
+      if (myGen !== generation) return;
+
+      if (muted) {
+        // No speech — but still auto-advance after a fixed delay so the show continues
+        if (autoNext) {
+          pendingTimer = setTimeout(() => speakSlide(idx + 1, true), 4000);
+        }
+        return;
+      }
 
       const utt = new SpeechSynthesisUtterance(scripts[idx]);
       const voice = pickVoice();
@@ -330,13 +366,13 @@
       utt.volume = 1.0;
 
       utt.onend = () => {
-        if (myGen !== generation) return; // stale — ignore
+        if (myGen !== generation) return;
         if (autoNext) {
           pendingTimer = setTimeout(() => speakSlide(idx + 1, true), 600);
         }
       };
       utt.onerror = (e) => {
-        if (myGen !== generation) return; // stale — ignore
+        if (myGen !== generation) return;
         console.warn('Speech error on slide', idx, e.error);
         if (autoNext) {
           pendingTimer = setTimeout(() => speakSlide(idx + 1, true), 800);
@@ -344,14 +380,18 @@
       };
 
       window.speechSynthesis.speak(utt);
-    }, 250);  // 250ms gives Chrome enough time to drain the cancelled utterance
+    }, 250);
   }
 
   // ── JUMP (slider / arrows) ────────────────────────────────────────────────
   function jumpTo(idx) {
     if (idx < 0 || idx >= N) return;
-    cancelPending();          // stop current speech + any queued timer
-    speakSlide(idx, true);    // speak and resume auto-advance from here
+    // Clear paused state so audio plays after manual navigation
+    paused = false;
+    const btn = document.getElementById('btn-pause');
+    if (btn) { btn.innerHTML = '&#9646;&#9646;'; btn.title = 'Pause'; }
+    cancelPending();
+    speakSlide(idx, true);
   }
 
   // ── START ─────────────────────────────────────────────────────────────────
@@ -369,6 +409,8 @@
     scrubber.addEventListener('input', () => jumpTo(parseInt(scrubber.value)));
     document.getElementById('btn-prev').addEventListener('click', () => jumpTo(currentIdx - 1));
     document.getElementById('btn-next').addEventListener('click', () => jumpTo(currentIdx + 1));
+    document.getElementById('btn-pause').addEventListener('click', togglePause);
+    document.getElementById('btn-mute').addEventListener('click', toggleMute);
 
     startKeepAlive();
     speakSlide(0, true);
@@ -481,7 +523,7 @@
 <div id="start-screen">
   <div class="logo">🚀</div>
   <h1>Navigate Transfer &amp; Career Journeys</h1>
-  <p>~40 second overview · sound on 🔊</p>
+  <p>~40 second overview · <span id="sound-hint">sound on 🔊</span></p>
   <p style="font-size:13px; color:rgba(255,255,255,0.35); letter-spacing:0.5px; margin-top:-10px;">
     Built using Claude &nbsp;·&nbsp; LaGuardia Community College
   </p>
@@ -491,6 +533,8 @@
 
 <div id="slide-nav">
   <button id="btn-prev" title="Previous">&#9664;</button>
+  <button id="btn-pause" title="Pause">&#9646;&#9646;</button>
+  <button id="btn-mute" title="Mute sound">🔊</button>
   <input id="slide-scrubber" type="range" min="0" step="1" value="0" />
   <button id="btn-next" title="Next">&#9654;</button>
   <span id="slide-counter">1 / 7</span>
