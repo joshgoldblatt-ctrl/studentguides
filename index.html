@@ -86,6 +86,9 @@
   #s7 .steps-row { display: flex; gap: 20px; }
   #s7 .step-pill { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 40px; padding: 10px 22px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   #s7 .credit { position: absolute; bottom: 16px; right: 24px; font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+  #s7 .cta-tips { list-style: none; display: flex; flex-direction: column; gap: 10px; max-width: 720px; width: 100%; }
+  #s7 .cta-tips li { font-size: 16px; color: rgba(255,255,255,0.85); display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+  #s7 .cta-tips li::before { content: "✓"; color: #06d6a0; font-weight: 900; flex-shrink: 0; margin-top: 1px; }
 
   /* PROGRESS */
   #progress-bar { position: fixed; bottom: 0; left: 0; height: 5px; background: linear-gradient(90deg, #ffd166, #e94560); width: 0%; z-index: 999; }
@@ -158,11 +161,12 @@
       <h3>Part 1 · 0–30 Credits</h3>
       <ul>
         <li>Research career paths in FYS</li>
-        <li>Explore baccalaureate programs</li>
-        <li>Attend Transfer &amp; Career Events</li>
+        <li>Explore baccalaureate programs &amp; create a transfer plan</li>
+        <li>Attend transfer and career events</li>
         <li>Meet with an industry professional</li>
         <li>Claim your Handshake account</li>
         <li>Draft a resume &amp; cover letter</li>
+        <li>Join a student club</li>
       </ul>
     </div>
     <div class="col">
@@ -233,11 +237,11 @@
   <div class="rocket2">🚀</div>
   <h2>Your Future Starts Now.</h2>
   <p>Open Navigate today and start your Journey!</p>
-  <div class="steps-row">
-    <div class="step-pill">📱 Open Navigate</div>
-    <div class="step-pill">🔀 Find Journeys</div>
-    <div class="step-pill">✅ Check Off Steps</div>
-  </div>
+  <ul class="cta-tips">
+    <li>Check off any steps you've completed — don't worry if there's nothing to check off yet</li>
+    <li>Advisors, career services, and other faculty and staff are here to help you</li>
+    <li>You don't need to follow the order — check off steps as you complete them</li>
+  </ul>
   <div class="credit">Made with Claude · LaGuardia Community College</div>
 </div>
 
@@ -248,11 +252,11 @@
   const N = slides.length;
 
   const scripts = [
-    "Hey LaGuardia! Did you know Navigate has a feature called Journeys? It's your personal roadmap to transfer and career success — and it's built right into the app!",
-    "Every student gets a Universal Transfer and Career Journey. In your first 30 credits, you're researching careers, attending events, and building your resume. Hit 30 credits? Time to apply to four-year programs and make that transfer happen!",
-    "Each major also has its own Journey with steps built just for you. For example, an Environmental Science step is to apply for a research opportunity, like NIH Bridges or REU — and a link is right there in Navigate with all the details!",
+    "Hey LaGuardia students! Did you know Navigate has a feature called Journeys? It's your personal roadmap to transfer and career success — and it's built right into the Navigate app!",
+    "Every student gets a Universal Transfer and Career Journey. In your first 30 credits, you're researching transfer and careers, attending events, and drafting your resume. Hit 30 credits? Time to apply to internships and four-year colleges!",
+    "Each major also has its own Journey with steps built just for you. As an example, for Environmental Science, one step is to apply for a research opportunity.",
     "Accessing it is super easy. Open Navigate, tap that grid icon at the bottom, and hit Journeys. That's it — you're in!",
-    "Inside, you'll see your journeys lined up with progress bars. Transfer journey? Check. Major-specific journey? Check. Tap one and let's go!",
+    "Inside, you'll see your journeys lined up with progress bars. Transfer and Career Journey? Check. Major-specific journey? Check. Tap one and let's go!",
     "Tap any step to see what it takes to complete it. Knocked it out? Hit This is completed, tap Save, and watch your progress grow. Every step counts!",
     "Open Navigate now and start your Journey. Your future is waiting!"
   ];
